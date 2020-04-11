@@ -33,7 +33,7 @@ func init() {
 	}
 }
 
-func (todo Todo) Create() error {
+func (todo *Todo) Create() error {
 
 	stmt, err := db.Prepare(queryInsertTodo)
 	if err != nil {

@@ -1,7 +1,7 @@
 package todos
 
 import (
-	"fmt"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/kurokuman/bookstore_users-api/logger"
@@ -13,10 +13,24 @@ func Create(c *gin.Context) {
 
 	var todo databases.Todo
 
-	todo.Title = "test title"
-	todo.Content = "test content"
+	err := c.ShouldBindJSON(&todo)
+	if err != nil {
+		logger.Error("error to should bind json", err)
+		c.JSON(http.StatusBadRequest, "invalid json body")
+		return
+	}
 
-	todo.Create()
+	message := todo.Validate()
+	if message != "" {
+		logger.Info(message)
+		c.JSON(http.StatusBadRequest, message)
+		return
+	}
 
-	fmt.Println(todo)
+	err = todo.Create()
+	if err != nil {
+		return
+	}
+
+	c.JSON(http.StatusCreated, todo)
 }
