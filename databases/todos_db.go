@@ -15,6 +15,7 @@ var (
 const (
 	queryInsertTodo  = "insert into todos(title, contents) values(?,?) "
 	queryGetAllTodos = "select * from todos"
+	queryGetTodo     = "select * from todos where id=?"
 )
 
 func init() {
@@ -54,6 +55,25 @@ func GetAll() ([]Todo, error) {
 	}
 
 	return todos, nil
+}
+
+func (todo *Todo) Get() error {
+	stmt, err := db.Prepare(queryGetTodo)
+	if err != nil {
+		logger.Error("error when trying to prepare get todo statement", err)
+		return err
+	}
+	defer stmt.Close()
+
+	result := stmt.QueryRow(todo.Id)
+	err = result.Scan(&todo.Id, &todo.Title, &todo.Content)
+	if err != nil {
+		logger.Error("error when trying to get todo by id", err)
+		return err
+	}
+
+	return nil
+
 }
 
 func (todo *Todo) Create() error {
