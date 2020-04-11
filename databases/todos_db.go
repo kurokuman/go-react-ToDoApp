@@ -13,7 +13,8 @@ var (
 )
 
 const (
-	queryInsertTodo = "insert into todos(title, contents) values(?,?) "
+	queryInsertTodo  = "insert into todos(title, contents) values(?,?) "
+	queryGetAllTodos = "select * from todos"
 )
 
 func init() {
@@ -31,6 +32,28 @@ func init() {
 	} else {
 		fmt.Println("database successfully configured")
 	}
+}
+
+func GetAll() ([]Todo, error) {
+	var todos []Todo
+	rows, err := db.Query(queryGetAllTodos)
+	if err != nil {
+		logger.Error("error when trying to query to get all ", err)
+		return todos, err
+	}
+	defer rows.Close()
+
+	var todo Todo
+	for rows.Next() {
+		err := rows.Scan(&todo.Id, &todo.Title, &todo.Content)
+		if err != nil {
+			logger.Error("error when trying to scan rows", err)
+			return todos, err
+		}
+		todos = append(todos, todo)
+	}
+
+	return todos, nil
 }
 
 func (todo *Todo) Create() error {
