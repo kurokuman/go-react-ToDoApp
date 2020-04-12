@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/kurokuman/bookstore_users-api/logger"
 )
@@ -14,8 +15,10 @@ var (
 
 const (
 	queryInsertTodo  = "insert into todos(title, contents) values(?,?) "
+	queryUpdateTodo  = "update todos set title=?, contents=? where id=?"
 	queryGetAllTodos = "select * from todos"
 	queryGetTodo     = "select * from todos where id=?"
+	queryDeleteTodo  = "delete from todos where id=?"
 )
 
 func init() {
@@ -100,4 +103,58 @@ func (todo *Todo) Create() error {
 	todo.Id = todoId
 
 	return nil
+}
+
+func (todo *Todo) Update() error {
+
+	stmt, err := db.Prepare(queryUpdateTodo)
+	if err != nil {
+		logger.Error("error when trying to prepare update todo statement ", err)
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(todo.Title, todo.Content, todo.Id)
+	if err != nil {
+		logger.Error("error when trying update todo", err)
+		return err
+	}
+
+	return nil
+}
+
+func (todo *Todo) BindJson(c *gin.Context) string {
+	var message string
+	err := c.ShouldBindJSON(&todo)
+	if err != nil {
+		logger.Error("error to should bind json", err)
+		message = "invalid json body"
+		return message
+	}
+
+	message = todo.Validate()
+	if message != "" {
+		logger.Info(message)
+		return message
+	}
+
+	return message
+}
+
+func (todo *Todo) Delete() error {
+	stmt, err := db.Prepare(queryDeleteTodo)
+	if err != nil {
+		logger.Error("error when trying to prepare delete todo statement", err)
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(todo.Id)
+	if err != nil {
+		logger.Error("error when trying to delete todo", err)
+		return err
+	}
+
+	return nil
+
 }
