@@ -3,7 +3,6 @@ package todos
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/kurokuman/go-react-ToDoApp/databases"
@@ -20,9 +19,7 @@ func GetAll(c *gin.Context) {
 }
 
 func Get(c *gin.Context) {
-	todoIdParam := c.Param("todo_id")
-
-	todoId, err := strconv.ParseInt(todoIdParam, 10, 64)
+	todoId, err := GetTodoId(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "error todo_id is should be a number")
 		return

@@ -13,8 +13,8 @@ func main() {
 	router.POST("/todos", todos.Create)
 	router.GET("/todos", todos.GetAll)
 	router.GET("/todos/:todo_id", todos.Get)
-	// router.PUT("/todos/:todo_id", todos.Update)
-	// router.DELETE("/todos/:todo_id", todos.Delete)
+	router.PUT("/todos/:todo_id", todos.Update)
+	router.DELETE("/todos/:todo_id", todos.Delete)
 	router.Run(":8080")
 
 }
